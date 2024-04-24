@@ -1,0 +1,125 @@
+swagger: '2.0'
+info:
+  version: '1.0.0'
+  title: "동적 번역 API"
+host: aws
+basePath: /
+schemes:
+  - https
+paths:
+  /:
+    post:
+      tags:
+        - Translation
+      summary: 기사 번역
+      description: |-
+        ## 동적 인풋 번역 기능
+        
+        #### URL
+        - 첨부드린 URL
+        #### Method
+        - POST
+        #### Body 설명
+        - (optional) model: OpenAI 모델명, [(지원모델)](https://platform.openai.com/docs/models/gpt-4-turbo-and-gpt-4)
+        - (optional) prompt: 사용자의 임의 프롬프트
+        - **(required) contents**: 동적 인풋 오브젝트
+           - ChatGPT 모델의 아웃풋 토큰 제한이 있어 배열 형태의 입력은 지원하지 않습니다.
+           - 오브젝트 형태 예시 아래 참조조
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: ""
+          required: true
+          schema:
+            type: object
+            properties:
+              model:
+                type: string
+                example: "gpt-3.5-turbo"
+              prompt:
+                type: string
+                example: "이부섭은 Bu Seop Lee로 번역해줘."
+              contents:
+                type: object
+                example:
+                    Idxno: 2239
+                    Name: 이부섭
+                    Hobby: ''
+                    Job: 동진쎄미켐
+                    Position: 회장
+                    Former Job1: ''
+                    Former Position1: ''
+                    Former Job2: ''
+                    Former Position2: ''
+                    Former Job4: ''
+                    Former Position4: ''
+            required:
+              - contents
+      responses:
+        '200':
+          description: "정상 응답"
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+                example: 200
+              body:
+                type: object
+                example:
+                  Idxno: 2239
+                  Name: "Bu Seop Lee"
+                  Hobby: ""
+                  Job: "DONGJIN SEMICHEM"
+                  Position: "Chairman"
+                  Former Job1: ""
+                  Former Position1: ""
+                  Former Job2: ""
+                  Former Position2: ""
+                  Former Job4: ""
+                  Former Position4: ""
+        '400':
+          description: 파라미터 입력 오류
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+                example: 400
+              body:
+                type: string
+                example: "Bad Request"
+        '404':
+          description: |-
+            OpenAI 오류, ([OpenAI 공식문서 참고](https://platform.openai.com/docs/guides/text-generation/chat-completions-api))
+            > Every response will include a finish_reason. The possible values for finish_reason are:
+            > - `stop`: API returned complete message, or a message terminated by one of the stop sequences provided via the stop parameter
+            > - `length`: Incomplete model output due to max_tokens parameter or token limit
+            > - `function_call`: The model decided to call a function
+            > - `content_filter`: Omitted content due to a flag from our content filters
+            > - `null`: API response still in progress or incomplete
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+                example: 404
+              body:
+                type: object
+                example:
+                  finish_reason: length
+        '500':
+          description: "서버 오류"
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+                example: 500
+              body:
+                type: string
+                example: "Internal Server Error"
